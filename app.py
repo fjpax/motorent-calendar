@@ -1,17 +1,57 @@
-from dash_extensions.enrich import DashProxy
+
 from dash_extensions import Purify, DeferScript
 from dash import html
+from dash.dependencies import ClientsideFunction
+from dash import html, dcc
+import json
+from dash_extensions.enrich import DashProxy, Input, Output, State, callback
 
+from dash import Dash, html, dcc, Input, Output, State
+from flask import jsonify
+from dash import Dash, html, dcc, Input, Output, State, callback, no_update
+import json
 
-app = DashProxy(assets_folder='assets')
+app = Dash(__name__, assets_folder='assets')
+
 app.layout = html.Div([
-                html.Div(className="card card-calendar", style={"height": "100%"}, children=[
-                        html.Div(className="card-body p-3", children=[
-                            html.Div(id="calendar", **{"data-bs-toggle": "calendar"})
-                        ])
-                    ]),
-                DeferScript(src='assets/full_calendar_deferscript.js')
+    html.Div([
+        html.Div(id='dummy-div', style={'display': 'none'}),
+        html.Div(id="calendar"),  # Calendar will be initialized here by FullCalendar JS
+    ], className="card card-calendar", style={"height": "100%"}),
+
+    html.Div([
+        dcc.Input(id='input-title', type='text', placeholder='Event Title'),
+        dcc.Input(id='input-start', type='text', placeholder='Start Date (YYYY-MM-DD)'),
+        dcc.Input(id='input-end', type='text', placeholder='End Date (YYYY-MM-DD)', value=''),
+        dcc.Dropdown(
+            id='input-classname',
+            options=[
+                {'label': 'Danger', 'value': 'bg-gradient-danger'},
+                {'label': 'Warning', 'value': 'bg-gradient-warning'},
+                {'label': 'Success', 'value': 'bg-gradient-success'},
+                {'label': 'Info', 'value': 'bg-gradient-info'},
+                {'label': 'Primary', 'value': 'bg-gradient-primary'}
+            ],
+            placeholder='Select Event Type'
+        ),
+        html.Button('Add Event', id='submit-button', n_clicks=0),
+    ], style={'padding': '20px'}),
 ])
 
+app.clientside_callback(
+    """
+    function(n_clicks, title, start, end, classname) {
+        return dash_clientside.clientside.addEvent(n_clicks, title, start, end, classname);
+    }
+    """,
+    Output('dummy-div', 'children'),  # This output can be an invisible div just to trigger callback
+    [Input('submit-button', 'n_clicks')],
+    [State('input-title', 'value'),
+     State('input-start', 'value'),
+     State('input-end', 'value'),
+     State('input-classname', 'value')]
+)
+
 if __name__ == "__main__":
-    app.run_server()
+    app.run_server(debug=True)
+

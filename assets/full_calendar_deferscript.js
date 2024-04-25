@@ -169,3 +169,40 @@ var calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
         },
       },
     });
+document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('calendar');
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+      contentHeight: 'auto',
+      initialView: 'dayGridMonth',
+      headerToolbar: {
+          start: 'title',
+          center: '',
+          end: 'today prev,next'
+      },
+      selectable: true,
+      editable: true,
+      initialDate: '2021-12-01',
+      events: [] // Initialize with empty array
+  });
+
+  calendar.render();
+
+  document.getElementById('submit-button').addEventListener('click', function() {
+      var title = document.getElementById('input-title').value;
+      var start = document.getElementById('input-start').value;
+      var end = document.getElementById('input-end').value || start;
+      var className = document.getElementById('input-classname').value;
+      if (title && start && className) {
+          var eventData = {
+              title: title,
+              start: start,
+              end: end,
+              className: className
+          };
+          calendar.addEvent(eventData);
+      } else {
+          alert("All fields except end date must be filled out.");
+      }
+  });
+});
+  
