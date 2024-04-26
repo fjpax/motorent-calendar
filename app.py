@@ -10,6 +10,32 @@ from dash import Dash, html, dcc, Input, Output, State
 from flask import jsonify
 from dash import Dash, html, dcc, Input, Output, State, callback, no_update
 import json
+# Get the MongoDB URI
+import os
+mongo_uri = os.getenv('MONGO_CLIENT')
+
+import json
+from pymongo.mongo_client import MongoClient
+
+# Connect to MongoDB (change the URI if using MongoDB Atlas with your credentials)
+
+client = MongoClient(mongo_uri)
+# Access the database
+db = client["motorent"]
+
+# Access the collection where you want to insert the event
+events_collection = db["reservations-calendar"]
+
+# db = client["motorent"]
+# events_collection = db["reservations-calendar"]
+
+# Send a ping to confirm a successful connection
+try:
+    client.admin.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
 
 app = Dash(__name__, assets_folder='assets')
 
